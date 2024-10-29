@@ -40,7 +40,8 @@ public class Spawner : MonoBehaviour
             movement += Vector2.right * moveSpeed;
         }
 
-        rb.position += movement * Time.deltaTime;
+        //rb.position += movement * Time.deltaTime;
+        rb.velocity = movement;
 
         spawnPosition = new Vector3(rb.position.x, rb.position.y - 0.6f, 0);
 

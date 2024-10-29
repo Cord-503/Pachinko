@@ -7,6 +7,12 @@ public class GameManager : MonoBehaviour
 {
     public int score = 0;
     [SerializeField] private Text scoreText;
+    [SerializeField] private float bonusMultiplier = 2f;
+
+    private int totalChestHits = 0;
+    private int totalGoldHits = 0;
+    private bool isBonusActive = false;
+
     public static GameManager Instance;
 
     void Awake()
@@ -22,9 +28,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        UpdateScoreText();
+    }
+
     public void AddScore(int scoreToAdd)
     {
-        score += scoreToAdd;
+        float finalScore = isBonusActive ? scoreToAdd * bonusMultiplier : scoreToAdd;
+        score += Mathf.RoundToInt(finalScore);
         UpdateScoreText();
     }
 
@@ -34,8 +46,44 @@ public class GameManager : MonoBehaviour
             scoreText.text = "Score: " + score;
     }
 
-    void Start()
+    public void RegisterHit(string objectTag)
     {
-        UpdateScoreText();
+        switch (objectTag)
+        {
+            case "Chest":
+                totalChestHits++;
+                AddScore(50);
+                Debug.Log($"Chest destroyed, total chest hits: {totalChestHits}");
+                break;
+            case "Gold":
+                totalGoldHits++;
+                AddScore(100);
+                Debug.Log($"Golden Chest destroyed, total gold hits: {totalGoldHits}");
+                break;
+            case "Goal":
+                AddScore(10);
+                Debug.Log($"Goal!!!!!!, adding {(isBonusActive ? 10 * bonusMultiplier : 10)} points");
+                break;
+            case "Target":
+                AddScore(30);
+                Debug.Log($"Target hit!!!!!!, adding {(isBonusActive ? 30 * bonusMultiplier : 30)} points");
+                break;
+        }
+
+        CheckBonusCondition();
+    }
+
+    private void CheckBonusCondition()
+    {
+        if (!isBonusActive && totalChestHits >= 2 && totalGoldHits >= 1)
+        {
+            ActivateBonus();
+        }
+    }
+
+    private void ActivateBonus()
+    {
+        isBonusActive = true;
+        Debug.Log($"Bonus Activated! All subsequent scores will be multiplied by {bonusMultiplier}x!");
     }
 }
